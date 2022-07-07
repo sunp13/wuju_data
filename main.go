@@ -1,7 +1,9 @@
 package main
 
 import (
+	"fmt"
 	"io/ioutil"
+	"strconv"
 	"time"
 	"wuju_data/entity"
 	"wuju_data/global"
@@ -48,14 +50,22 @@ func init() {
 
 func main() {
 	// 初始化缓存数据
+	go func() {
+		t := time.NewTicker(1 * time.Second)
+		for range t.C {
+			fmt.Println(len(global.CH_BULK))
+		}
+	}()
 
 	// 初始化UpComing
 	services.UpCommingService.Setup(&conf)
 	services.UpCommingService.Reload(&conf)
-
 	// 初始化prematch
 	services.PrematchService.Setup(&conf)
-	services.PrematchService.Reload(&conf)
+	// 初始化event
+	services.EventService.Setup(&conf)
+	// 初始化snow
+	services.SnowFlakeService.Setup(&conf)
 
 	// 1. 跑upComing数据
 	go func() {
@@ -82,6 +92,28 @@ func main() {
 				<-global.CH_BULK
 				if err := services.PrematchService.GetPrematchData(commID); err != nil {
 					log.Error().Str("err", err.Error()).Send()
+				}
+			}
+		}
+	}()
+
+	// 3. 跑event数据
+	go func() {
+		t := time.NewTicker(1 * time.Second)
+		for range t.C {
+			for commID, commValue := range global.C_COMM.Items() {
+				// 判断开始时间
+				commTime := fmt.Sprintf("%v", commValue.Object)
+				commTimeUnix, _ := strconv.ParseInt(commTime, 10, 64)
+				nowUnix := time.Now().Unix()
+				// 判断是否距离开赛15分钟之内
+				if commTimeUnix-nowUnix < 15*60 {
+					// 获取并发权限
+					<-global.CH_BULK
+					err := services.EventService.GetEventData(commID)
+					if err != nil {
+						log.Error().Str("err", err.Error()).Send()
+					}
 				}
 			}
 		}

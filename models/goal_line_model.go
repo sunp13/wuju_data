@@ -18,24 +18,29 @@ func (m *goalLineModel) GetListByCommID(commID string) (res []map[string]interfa
 	return
 }
 
-func (m *goalLineModel) AddList(commID, overOdds, overName, underOdds, underName, updateAt string) (res int64, err error) {
+func (m *goalLineModel) AddList(snowID, commID, overOdds, overName, underOdds, underName, addTime, dataHash string) (res int64, err error) {
 	sql := `
 	insert into b365api.goal_line(
+		goal_id,
 		comm_id,
 		over_odds,
 		over_name,
 		under_odds,
 		under_name,
-		update_at
-	) values (?,?,?,?,?,?)
+		add_time,
+		data_hash
+	) values (?,?,?,?,?,?,?,?) on duplicate key update update_time = ?
 	`
 	params := []interface{}{
+		snowID,
 		commID,
 		overOdds,
 		overName,
 		underOdds,
 		underName,
-		updateAt,
+		addTime,
+		dataHash,
+		addTime,
 	}
 	res, err = dbtool.D.UpdateSQL(sql, params)
 	return

@@ -6,6 +6,7 @@ type Conf struct {
 	UpComing         string        `yaml:"upcoming"`
 	UpComingInterval int           `yaml:"upcoming_interval"`
 	PreMatch         string        `yaml:"prematch"`
+	Event            string        `yaml:"event"`
 	Leagues          []ConfLeagues `yaml:"leagues"`
 }
 type ConfLeagues struct {

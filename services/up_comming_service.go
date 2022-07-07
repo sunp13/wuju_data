@@ -35,7 +35,7 @@ func (s *upCommingService) Reload(conf *entity.Conf) {
 			commTime := fmt.Sprintf("%v", dataV["comm_time"])
 			commTimeInt64, _ := strconv.ParseInt(commTime, 10, 64)
 			if commTimeInt64 > time.Now().Unix() {
-				expireSec := commTimeInt64 - time.Now().Unix()
+				expireSec := commTimeInt64 - time.Now().Unix() + 5*60
 				if err := global.C_COMM.Add(commID, commTime, time.Duration(expireSec)*time.Second); err != nil {
 					log.Error().Str("err", err.Error()).Send()
 				}
@@ -66,6 +66,7 @@ func (s *upCommingService) GetCommingData(leagueID string, page int) error {
 	i := 0
 	for _, v := range respComm.Results {
 		_, err := models.UpCommingModel.AddList(
+			SnowFlakeService.NextID(),
 			v.ID,
 			v.Time,
 			v.League.ID,
@@ -77,7 +78,7 @@ func (s *upCommingService) GetCommingData(leagueID string, page int) error {
 			v.SS,
 			v.OurEventID,
 			v.RID,
-			v.UpdatedAt,
+			time.Now().Format("2006-01-02 15:04:05"),
 		)
 		if err != nil {
 			continue
@@ -85,7 +86,8 @@ func (s *upCommingService) GetCommingData(leagueID string, page int) error {
 
 		commTime, _ := strconv.ParseInt(v.Time, 10, 64)
 		if commTime > time.Now().Unix() {
-			expireSec := commTime - time.Now().Unix()
+			// 数据过期时间为 开赛过后300秒(5分钟)
+			expireSec := commTime - time.Now().Unix() + 5*60
 			if err := global.C_COMM.Add(v.ID, commTime, time.Duration(expireSec)*time.Second); err != nil {
 				log.Error().Str("err", err.Error()).Send()
 			}

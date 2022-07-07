@@ -21,22 +21,27 @@ func (m *fullTimeModel) GetListByCommID(commID string) (res []map[string]interfa
 }
 
 // AddList
-func (m *fullTimeModel) AddList(commID, homeOdds, drawOdds, awayOdds, updateAt string) (res int64, err error) {
+func (m *fullTimeModel) AddList(snowID, commID, homeOdds, drawOdds, awayOdds, addTime, dataHash string) (res int64, err error) {
 	sql := `
 	insert into b365api.full_time(
+		full_id,
 		comm_id,
 		home_odds,
 		draw_odds,
 		away_odds,
-		update_at
-	) values (?,?,?,?,?)
+		add_time,
+		data_hash
+	) values (?,?,?,?,?,?,?) on duplicate key update update_time = ?
 	`
 	params := []interface{}{
+		snowID,
 		commID,
 		homeOdds,
 		drawOdds,
 		awayOdds,
-		updateAt,
+		addTime,
+		dataHash,
+		addTime,
 	}
 	res, err = dbtool.D.UpdateSQL(sql, params)
 	return

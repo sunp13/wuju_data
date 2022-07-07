@@ -3,6 +3,7 @@ module wuju_data
 go 1.17
 
 require (
+	github.com/bwmarrin/snowflake v0.3.0
 	github.com/go-sql-driver/mysql v1.6.0
 	github.com/json-iterator/go v1.1.12
 	github.com/patrickmn/go-cache v2.1.0+incompatible

@@ -10,4 +10,6 @@ var (
 	GoalLineModel goalLineModel
 	// FullTimeModel
 	FullTimeModel fullTimeModel
+	// InplayEventModel
+	InPlayEventModel inPlayEventModel
 )

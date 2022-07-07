@@ -54,10 +54,11 @@ func (m *upCommingModel) GetListByID(id string) (res map[string]interface{}, err
 	return
 }
 
-func (m *upCommingModel) AddList(commID, commTime, leagueID, leagueName, homeID, homeName, awayID, awayName, ss, ourEventID, rID, updateAt string) (res int64, err error) {
+func (m *upCommingModel) AddList(snowID, commID, commTime, leagueID, leagueName, homeID, homeName, awayID, awayName, ss, ourEventID, rID, addTime string) (res int64, err error) {
 
 	sql := `
 	insert into b365api.up_coming(
+		up_id,
 		comm_id,
 		comm_time,
 		league_id,
@@ -69,10 +70,11 @@ func (m *upCommingModel) AddList(commID, commTime, leagueID, leagueName, homeID,
 		ss,
 		our_event_id,
 		r_id,
-		update_at
-	) value (?,?,?,?,?,?,?,?,?,?,?,?)
+		add_time
+	) value (?,?,?,?,?,?,?,?,?,?,?,?,?) on duplicate key update update_time = ?
 	`
 	params := []interface{}{
+		snowID,
 		commID,
 		commTime,
 		leagueID,
@@ -84,7 +86,8 @@ func (m *upCommingModel) AddList(commID, commTime, leagueID, leagueName, homeID,
 		ss,
 		ourEventID,
 		rID,
-		updateAt,
+		addTime,
+		addTime,
 	}
 	res, err = dbtool.D.UpdateSQL(sql, params)
 	return
